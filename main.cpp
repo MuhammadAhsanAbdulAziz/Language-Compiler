@@ -1,9 +1,3 @@
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <vector>
-#include <regex>
-#include <sstream>
 #include "SyntaxAnalyzer.h"
 using namespace std;
 
