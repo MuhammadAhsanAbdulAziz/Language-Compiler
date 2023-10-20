@@ -33,5 +33,13 @@ public class Program
             var a : Number = a + b * 2. ;
             a = 2 + 3 * b [ 3 ] % 2 ;  
         }
-    }  
+    } 
+
+    Number sampleFunction => ( ) {
+        
+    }
+
+    void sampleFunction => ( var a : Number , var a : Word ) {
+        
+    }
 }

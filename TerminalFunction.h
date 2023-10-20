@@ -498,7 +498,8 @@ public:
                 }
             }
         }
-        if(tokens[index].VP == ")"){
+        if (tokens[index].VP == ")")
+        {
             index++;
             return true;
         }
@@ -525,7 +526,8 @@ public:
                 }
             }
         }
-        else if(tokens[index].VP == ")"){
+        else if (tokens[index].VP == ")")
+        {
             index++;
             return true;
         }
@@ -548,18 +550,22 @@ public:
                         index++;
                         if (sp_decl())
                         {
-                            if(tokens[index].VP == "{"){
+                            if (tokens[index].VP == "{")
+                            {
                                 index++;
-                                while(tokens[index].VP != "}"){
-                                    if(body()){
+                                while (tokens[index].VP != "}")
+                                {
+                                    if (body())
+                                    {
                                         continue;
                                     }
-                                    else{
+                                    else
+                                    {
                                         break;
                                     }
                                 }
-                                if(tokens[index].VP == "}"){
-                                    index++;
+                                if (tokens[index].VP == "}")
+                                {
                                     return true;
                                 }
                             }
@@ -580,14 +586,20 @@ public:
             {
                 other();
             }
-            else if (tokens[index].VP == "#")
+            else if (tokens[index].VP == "}")
             {
-                return true;
+                index++;
+                if (tokens[index].VP == "#")
+                {
+                    return true;
+                }
             }
-        }
-        else if (func_st())
-        {
-            other();
+            else if (func_st())
+            {
+                if(other()){
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -598,45 +610,45 @@ public:
         // {
         //     flag = 1;
         //     index++;
-            if (tokens[index].VP == "main" || tokens[index].VP == "Main")
+        if (tokens[index].VP == "main" || tokens[index].VP == "Main")
+        {
+            index++;
+            if (tokens[index].VP == "=>")
             {
                 index++;
-                if (tokens[index].VP == "=>")
+                if (tokens[index].VP == "(")
                 {
                     index++;
-                    if (tokens[index].VP == "(")
+                    if (tokens[index].VP == ")")
                     {
                         index++;
-                        if (tokens[index].VP == ")")
+                        if (tokens[index].VP == "{")
                         {
                             index++;
-                            if (tokens[index].VP == "{")
+                            while (tokens[index].VP != "}")
                             {
-                                index++;
-                                while (tokens[index].VP != "}")
+                                if (body())
                                 {
-                                    if (body())
-                                    {
-                                        continue;
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
+                                    continue;
                                 }
-                                if (tokens[index].VP == "}")
+                                else
                                 {
-                                    index++;
-                                    if (other())
-                                    {
-                                        return true;
-                                    }
+                                    break;
                                 }
+                            }
+                            if (tokens[index].VP == "}")
+                            {
+                                // if (other())
+                                // {
+                                //     return true;
+                                // }
+                                return true;
                             }
                         }
                     }
                 }
             }
+        }
         // }
         return false;
     }
@@ -656,14 +668,22 @@ public:
                     {
                         index++;
 
-                        while(!main_fn()){
-                            if(func_st()){
+                        while (!main_fn())
+                        {
+                            if (func_st())
+                            {
+                                index++;
                                 continue;
                             }
-                            else break;
+                            else
+                                break;
                         }
-                        if(tokens[index].VP == "#"){
-                            return true;
+                        if (tokens[index].VP == "}")
+                        {
+                            if (other())
+                            {
+                                return true;
+                            }
                         }
                     }
                 }
