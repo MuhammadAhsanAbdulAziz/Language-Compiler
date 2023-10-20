@@ -11,6 +11,7 @@ class TerminalFunction
 {
 private:
     int index = 0;
+    int flag = 0;
 
 public:
     int lineNumber = 0;
@@ -112,8 +113,9 @@ public:
         return false;
     }
 
-    bool array_init2(){
-        if(tokens[index].VP == ",")
+    bool array_init2()
+    {
+        if (tokens[index].VP == ",")
         {
             index++;
             return true;
@@ -123,25 +125,32 @@ public:
 
     bool array_init()
     {
-        while(tokens[index].VP != ";"){
-            if(tokens[index].CP == "Number" || tokens[index].CP == "Word"){
+        while (tokens[index].VP != ";")
+        {
+            if (tokens[index].CP == "Number" || tokens[index].CP == "Word")
+            {
                 index++;
-                if(array_init2()){
+                if (array_init2())
+                {
                     continue;
                 }
-                else if(tokens[index].VP == "}"){
+                else if (tokens[index].VP == "}")
+                {
                     index++;
-                    if(tokens[index].VP == ";"){
+                    if (tokens[index].VP == ";")
+                    {
                         break;
                     }
-                    else if(tokens[index].VP == "{"){
+                    else if (tokens[index].VP == "{")
+                    {
                         index++;
                         continue;
                     }
                 }
             }
         }
-        if(tokens[index].VP == ";"){
+        if (tokens[index].VP == ";")
+        {
             index++;
             return true;
         }
@@ -418,6 +427,7 @@ public:
         }
         return false;
     }
+
     bool if_st()
     {
         if (tokens[index].VP == "if")
@@ -459,13 +469,105 @@ public:
         return false;
     }
 
-    bool func_st()
+    bool class_def()
     {
         return false;
     }
 
-    bool class_def()
+    bool newline()
     {
+        while (tokens[index].VP != ")")
+        {
+            if (tokens[index].VP == ",")
+            {
+                index++;
+                if (var_st())
+                {
+                    if (IDENTIFIER())
+                    {
+                        if (tokens[index].VP == ":")
+                        {
+                            index++;
+                            if (tokens[index].CP == "DT")
+                            {
+                                index++;
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if(tokens[index].VP == ")"){
+            index++;
+            return true;
+        }
+        return false;
+    }
+
+    bool sp_decl()
+    {
+        if (var_st())
+        {
+            if (IDENTIFIER())
+            {
+                if (tokens[index].VP == ":")
+                {
+                    index++;
+                    if (tokens[index].CP == "DT")
+                    {
+                        index++;
+                        if (newline())
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        else if(tokens[index].VP == ")"){
+            index++;
+            return true;
+        }
+        return false;
+    }
+
+    bool func_st()
+    {
+        if (tokens[index].CP == "DT" || tokens[index].VP == "void")
+        {
+            index++;
+            if (tokens[index].CP == "IDENTIFIER")
+            {
+                index++;
+                if (tokens[index].VP == "=>")
+                {
+                    index++;
+                    if (tokens[index].VP == "(")
+                    {
+                        index++;
+                        if (sp_decl())
+                        {
+                            if(tokens[index].VP == "{"){
+                                index++;
+                                while(tokens[index].VP != "}"){
+                                    if(body()){
+                                        continue;
+                                    }
+                                    else{
+                                        break;
+                                    }
+                                }
+                                if(tokens[index].VP == "}"){
+                                    index++;
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return false;
     }
 
@@ -492,45 +594,50 @@ public:
 
     bool main_fn()
     {
-        if (tokens[index].VP == "void")
-        {
-            index++;
+        // if (tokens[index].VP == "void")
+        // {
+        //     flag = 1;
+        //     index++;
             if (tokens[index].VP == "main" || tokens[index].VP == "Main")
             {
                 index++;
-                if (tokens[index].VP == "(")
+                if (tokens[index].VP == "=>")
                 {
                     index++;
-                    if (tokens[index].VP == ")")
+                    if (tokens[index].VP == "(")
                     {
                         index++;
-                        if (tokens[index].VP == "{")
+                        if (tokens[index].VP == ")")
                         {
                             index++;
-                            while (tokens[index].VP != "}")
-                            {
-                                if (body())
-                                {
-                                    continue;
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                            if (tokens[index].VP == "}")
+                            if (tokens[index].VP == "{")
                             {
                                 index++;
-                                if (other())
+                                while (tokens[index].VP != "}")
                                 {
-                                    return true;
+                                    if (body())
+                                    {
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                                if (tokens[index].VP == "}")
+                                {
+                                    index++;
+                                    if (other())
+                                    {
+                                        return true;
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
+        // }
         return false;
     }
 
@@ -548,8 +655,14 @@ public:
                     if (tokens[index].VP == "{")
                     {
                         index++;
-                        if (main_fn())
-                        {
+
+                        while(!main_fn()){
+                            if(func_st()){
+                                continue;
+                            }
+                            else break;
+                        }
+                        if(tokens[index].VP == "#"){
                             return true;
                         }
                     }

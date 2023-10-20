@@ -1,6 +1,18 @@
 public class Program
 {
-    void main ( )
+    void sampleFunction => ( var a : Number ) {
+
+    }
+
+    void sampleFunction => ( var a : Number , var a : Word ) {
+        
+    }
+
+    Number sampleFunction => ( ) {
+        
+    }
+
+    main => ( )
     {
 
         var a : Number [ 2 ] [ 2 ] { 2 , 3 } { "amir" , "chota" } ;
