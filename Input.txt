@@ -1,0 +1,25 @@
+public class Program
+{
+    void main ( )
+    {
+
+        var a : Number [ 2 ] [ 2 ] { 2 , 3 } { "amir" , "chota" } ;
+
+        a ++ ;
+
+        if ( num % 2 == 0 ) {
+            a = "ahsan" ;
+        }
+        if_not ( zain ) {
+            hello = true ;
+        }
+        do_this {
+            var a : Number = "Ahsan" ;
+        }
+
+        looping_till ( i < 10 ) {
+            var a : Number = a + b * 2. ;
+            a = 2 + 3 * b [ 3 ] % 2 ;  
+        }
+    }  
+}
