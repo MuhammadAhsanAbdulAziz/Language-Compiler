@@ -865,6 +865,14 @@ public:
             else if (tokens[index].VP == "}")
             {
                 index++;
+                if(class_def())
+                {
+                    index--;
+                    other();
+                }
+                else if(func_st()){
+                    other();
+                }
                 if (tokens[index].VP == "#")
                 {
                     return true;

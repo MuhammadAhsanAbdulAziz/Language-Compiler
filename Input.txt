@@ -73,3 +73,22 @@ public class Program
         
     }
 }
+
+sealed public class Test ( abc ) {
+
+    public Test ( var abc : Number , var abc : Word ) ;
+
+    public ~ Test ( ) ;
+
+    public var abc : Number ;
+
+    
+
+    public void sampleFunction => ( var a : Number ) {
+        var a : Number [ 2 ] [ 2 ] { 2 , 3 } { "amir" , "chota" } ;
+    }
+}
+
+    Number sampleFunction => ( ) {
+        
+    }
