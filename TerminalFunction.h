@@ -346,7 +346,7 @@ public:
         {
             return true;
         }
-        else if (tokens[index].VP == ";" || tokens[index].CP == "Word" || tokens[index].CP == "Number" || tokens[index].CP == "Boolean" || tokens[index].CP == "IDENTIFIER" || tokens[index].VP == "true" || tokens[index].VP == "false" || tokens[index].CP == "DT" || tokens[index].VP == "}")
+        else if (tokens[index].VP == ";" || tokens[index].VP == "this" ||  tokens[index].CP == "Word" || tokens[index].CP == "Number" || tokens[index].CP == "Boolean" || tokens[index].CP == "IDENTIFIER" || tokens[index].VP == "true" || tokens[index].VP == "false" || tokens[index].CP == "DT" || tokens[index].VP == "}")
         {
             index++;
             return true;
@@ -463,8 +463,290 @@ public:
         return false;
     }
 
+    bool class_type()
+    {
+        if (tokens[index].VP == "abstract" || tokens[index].VP == "sealed")
+        {
+            index++;
+            return true;
+        }
+        return false;
+    }
+
+    bool inheritence()
+    {
+        if (tokens[index].VP == "(")
+        {
+            index++;
+            if (tokens[index].CP == "IDENTIFIER")
+            {
+                index++;
+                if (tokens[index].VP == ")")
+                {
+                    index++;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    bool constructor()
+    {
+        if (tokens[index].CP == "IDENTIFIER")
+        {
+            index++;
+            if (tokens[index].VP == "(")
+            {
+                index++;
+                if (sp_decl())
+                {
+                    if(tokens[index].VP == ";"){
+                        index++;
+                        return true;
+                    }
+                    else if (tokens[index].VP == "{")
+                    {
+                        index++;
+                        while (tokens[index].VP != "}")
+                        {
+                            if (body())
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        if (tokens[index].VP == "}")
+                        {
+                            index++;
+                            return true;
+                        }
+                    }
+                }
+                else if (tokens[index].VP == ")")
+                {
+                    index++;
+                    if (tokens[index].VP == "{")
+                    {
+                        index++;
+                        while (tokens[index].VP != "}")
+                        {
+                            if (body())
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        if (tokens[index].VP == "}")
+                        {
+                            index++;
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    bool destructor()
+    {
+        if (tokens[index].VP == "~")
+        {
+            index++;
+            if (tokens[index].CP == "IDENTIFIER")
+            {
+                index++;
+                if (tokens[index].VP == "(")
+                {
+                    index++;
+                    if (tokens[index].VP == ")")
+                    {
+                        index++;
+                        if (tokens[index].VP == "{")
+                        {
+                            index++;
+                            while (tokens[index].VP != "}")
+                            {
+                                if (body())
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            if (tokens[index].VP == "}")
+                            {
+                                index++;
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    bool statement()
+    {
+        if(tokens[index].CP == "IDENTIFIER" && tokens[index+1].VP == "("){
+            if(constructor()){
+                return true;
+            }
+        }
+        else if(decl()){
+            index++;
+            return true;
+
+        }
+        else if(func_st()){
+            index++;
+            return true;
+
+        }
+        else if (init() || destructor())
+        {
+            return true;
+        }
+        else if (tokens[index].VP == ";" || tokens[index].CP == "Word" || tokens[index].CP == "Number" || tokens[index].CP == "Boolean" || tokens[index].CP == "IDENTIFIER" || tokens[index].VP == "true" || tokens[index].VP == "false" || tokens[index].CP == "DT" || tokens[index].VP == "}")
+        {
+            index++;
+            return true;
+        }
+        return false;
+    }
+
+    bool cbody()
+    {
+        if (tokens[index].CP == "ACCESS_MODIFIERS")
+        {
+            index++;
+            if (statement())
+            {  
+                return true;
+            }
+        }
+        return false;
+    }
+
     bool class_def()
     {
+        if (class_type())
+        {
+            if (tokens[index].CP == "ACCESS_MODIFIERS")
+            {
+                index++;
+                if (tokens[index].VP == "class")
+                {
+                    index++;
+                    if (tokens[index].CP == "IDENTIFIER")
+                    {
+                        index++;
+                        if (inheritence())
+                        {
+                            if (tokens[index].VP == "{")
+                            {
+                                index++;
+                                while (tokens[index].VP != "}")
+                                {
+                                    if (cbody())
+                                    {
+                                        continue;
+                                    }
+                                    else
+                                        break;
+                                }
+                                if (tokens[index].VP == "}")
+                                {
+                                    index++;
+                                    return true;
+                                }
+                            }
+                        }
+                        else if (tokens[index].VP == "{")
+                        {
+                            index++;
+                            while (tokens[index].VP != "}")
+                            {
+                                if (cbody())
+                                {
+                                    continue;
+                                }
+                                else
+                                    break;
+                            }
+                            if (tokens[index].VP == "}")
+                            {
+                                index++;
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else if (tokens[index].CP == "ACCESS_MODIFIERS")
+        {
+            index++;
+            if (tokens[index].VP == "class")
+            {
+                index++;
+                if (tokens[index].CP == "IDENTIFIER")
+                {
+                    index++;
+                    if (inheritence())
+                    {
+                        if (tokens[index].VP == "{")
+                        {
+                            index++;
+                            while (tokens[index].VP != "}")
+                            {
+                                if (cbody())
+                                {
+                                    continue;
+                                }
+                                else
+                                    break;
+                            }
+                            if (tokens[index].VP == "}")
+                            {
+                                index++;
+                                return true;
+                            }
+                        }
+                    }
+                    else if (tokens[index].VP == "{")
+                    {
+                        index++;
+                        while (tokens[index].VP != "}")
+                        {
+                            if (cbody())
+                            {
+                                continue;
+                            }
+                            else
+                                break;
+                        }
+                        if (tokens[index].VP == "}")
+                        {
+                            index++;
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
         return false;
     }
 
@@ -590,7 +872,8 @@ public:
             }
             else if (func_st())
             {
-                if(other()){
+                if (other())
+                {
                     return true;
                 }
             }
@@ -649,6 +932,13 @@ public:
 
     bool start()
     {
+        while (tokens[index + 2].VP != "Program")
+        {
+            if (class_def())
+            {
+                continue;
+            }
+        }
         if (tokens[index].VP == "public")
         {
             index++;
