@@ -45,7 +45,7 @@ public:
         {
             return true;
         }
-        if (tokens[index].CP == "INC_DEC" || tokens[index].CP == "Number" || tokens[index].CP == "Word" || tokens[index].VP == "this" || tokens[index].VP == "true" || tokens[index].VP == "false" || tokens[index].CP == "ARITHMATIC_OPERATORS" || tokens[index].CP == "LOGICAL_OPERATORS" || tokens[index].CP == "ASSIGN_OPERATORS" || tokens[index].CP == "IDENTIFIER" || tokens[index].VP == "(" || tokens[index].VP == ")" || tokens[index].VP == "[" || tokens[index].VP == "]")
+        if (tokens[index].CP == "INC_DEC" || tokens[index].CP == "Number" || tokens[index].CP == "Word" || tokens[index].VP == "this" || tokens[index].VP == "true" || tokens[index].VP == "false" || tokens[index].CP == "ARITHMATIC_OPERATORS" || tokens[index].CP == "LOGICAL_OPERATORS" || tokens[index].CP == "ASSIGN_OPERATORS" || tokens[index].CP == "IDENTIFIER" || tokens[index].VP == "this" || tokens[index].VP == "." || tokens[index].VP == "(" || tokens[index].VP == ")" || tokens[index].VP == "[" || tokens[index].VP == "]")
         {
             index++;
             return true;
@@ -79,6 +79,7 @@ public:
         }
         if (tokens[index].VP == ";")
         {
+            index++;
             return true;
         }
         return false;
@@ -206,6 +207,15 @@ public:
                         if (array_decl())
                         {
                             return true;
+                        }
+                    }
+                    else if( tokens[index].VP == "<"){
+                        index++;
+                        if(tokens[index].VP =="Stack"){
+                            index++;
+                            if(tokens[index].VP == ">"){
+                                index++;
+                            }
                         }
                     }
                 }
@@ -340,13 +350,55 @@ public:
         return false;
     }
 
+    bool obj_init()
+    {
+        if (tokens[index].CP == "IDENTIFIER" || tokens[index].CP == "Number" || tokens[index].CP == "Word" || tokens[index].CP == "Boolean" || tokens[index].VP == "[" || tokens[index].VP == "]" || tokens[index].VP == "(" || tokens[index].VP == ")" || tokens[index].VP == ",")
+        {
+            index++;
+            return true;
+        }
+        return false;
+    }
+
+    bool obj_decl()
+    {
+        if (tokens[index].CP == "IDENTIFIER")
+        {
+            index++;
+            if (tokens[index].VP == "(")
+            {
+                index++;
+                while (tokens[index].VP != ")")
+                {
+                    if (obj_init())
+                    {
+                        continue;
+                    }
+                    else
+                        break;
+                }
+                if (tokens[index].VP == ")")
+                {
+                    index++;
+                    // if(tokens[index].VP == ";"){
+                    //     index++;
+                    //     return true;
+                    // }
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     bool body()
     {
-        if (looping_till() || if_st() || decl() || init())
+        if (looping_till() || if_st() || decl() || init() || obj_decl())
         {
             return true;
         }
-        else if (tokens[index].VP == ";" || tokens[index].VP == "this" ||  tokens[index].CP == "Word" || tokens[index].CP == "Number" || tokens[index].CP == "Boolean" || tokens[index].CP == "IDENTIFIER" || tokens[index].VP == "true" || tokens[index].VP == "false" || tokens[index].CP == "DT" || tokens[index].VP == "}")
+        else if (tokens[index].VP == ";" || tokens[index].VP == "this" || tokens[index].VP == "." || tokens[index].CP == "Word" || tokens[index].CP == "Number" || tokens[index].CP == "Boolean" || tokens[index].CP == "IDENTIFIER" || tokens[index].VP == "true" || tokens[index].VP == "false" || tokens[index].VP == "}")
         {
             index++;
             return true;
@@ -501,7 +553,8 @@ public:
                 index++;
                 if (sp_decl())
                 {
-                    if(tokens[index].VP == ";"){
+                    if (tokens[index].VP == ";")
+                    {
                         index++;
                         return true;
                     }
@@ -599,20 +652,22 @@ public:
 
     bool statement()
     {
-        if(tokens[index].CP == "IDENTIFIER" && tokens[index+1].VP == "("){
-            if(constructor()){
+        if (tokens[index].CP == "IDENTIFIER" && tokens[index + 1].VP == "(")
+        {
+            if (constructor())
+            {
                 return true;
             }
         }
-        else if(decl()){
+        else if (decl())
+        {
             index++;
             return true;
-
         }
-        else if(func_st()){
+        else if (func_st())
+        {
             index++;
             return true;
-
         }
         else if (init() || destructor())
         {
@@ -632,7 +687,7 @@ public:
         {
             index++;
             if (statement())
-            {  
+            {
                 return true;
             }
         }
@@ -865,12 +920,13 @@ public:
             else if (tokens[index].VP == "}")
             {
                 index++;
-                if(class_def())
+                if (class_def())
                 {
                     index--;
                     other();
                 }
-                else if(func_st()){
+                else if (func_st())
+                {
                     other();
                 }
                 if (tokens[index].VP == "#")

@@ -1,6 +1,8 @@
 public class Test ( abc ) {
 
-    public Test ( var abc : Number , var abc : Word ) ;
+    public Test ( var abc : Number , var abc : Word ) {
+        this . abc = abc ( ) [ 2 ] ;
+    } 
 
     public ~ Test ( ) ;
 
@@ -44,10 +46,13 @@ public class Program
 
     main => ( )
     {
+        var a : Number  < Stack >  ;
 
         var a : Number [ 2 ] [ 2 ] { 2 , 3 } { "amir" , "chota" } ;
 
         a ++ ;
+
+        ABC abc ( abc , "ahsan" , 1 ) ;
 
         if ( num % 2 == 0 ) {
             a = "ahsan" ;

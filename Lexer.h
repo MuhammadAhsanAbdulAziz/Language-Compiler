@@ -5,9 +5,9 @@
 #include <sstream>
 using namespace std;
 
-vector<string> KEYWORDS = {"Public", "main", "STACK", "class", "Program", "Main", "void", "var", "VAR", "Var", "true", "false", "if", "if_not", "do_this", "looping_till", "Class", "Sealed", "Abstract", "this"};
-vector<string> DT = {"Number", "Boolean", "Word"};
-vector<string> TERMINATORS = {";", "{", "}", "(", ")", ":", "=>", "[", "]", "~"};
+vector<string> KEYWORDS = {"Public", "main", "class", "rogram", "Main", "void", "var", "VAR", "Var", "true", "false", "if", "if_not", "do_this", "looping_till", "class", "sealed", "abstract", "this"};
+vector<string> DT = {"Number", "Boolean", "Word","Stack"};
+vector<string> TERMINATORS = {";", "{", "}", "(", ")", ":", "=>", "[", "]", "~","."};
 vector<string> ACCESS_MODIFIERS = {"public", "private", "protected"};
 vector<string> ASSIGN_OPERATORS = {"=", "+=", "-=", "*=", "/="};
 vector<string> INC_DEC = {"++","--"};
