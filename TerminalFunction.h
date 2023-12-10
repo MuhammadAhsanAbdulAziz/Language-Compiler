@@ -1,14 +1,18 @@
 #include "Lexer.h"
+#include "SemanticAnalyzer.h"
 using namespace std;
 
 class TerminalFunction
 {
 private:
     int index = 0;
-    int flag = 0;
+    SemanticAnalyzer SA;
+    string className = " ", name = " ", type = " ", accessModifer = " ", typeModifer = " ", parent = " ", paramsList = "", constructorName = "", returnType = " ",funcName = " ";
+    int inherit = 0;
 
 public:
     int lineNumber = 0;
+
     bool var_st()
     {
         if (tokens[index].VP == "Var" || tokens[index].VP == "VAR" || tokens[index].VP == "var")
@@ -23,6 +27,7 @@ public:
     {
         if (tokens[index].CP == "DT")
         {
+            type = tokens[index].VP;
             index++;
             return true;
         }
@@ -33,6 +38,7 @@ public:
     {
         if (tokens[index].CP == "IDENTIFIER")
         {
+            name = tokens[index].VP;
             index++;
             return true;
         }
@@ -41,10 +47,6 @@ public:
 
     bool OE()
     {
-        if (DT())
-        {
-            return true;
-        }
         if (tokens[index].CP == "INC_DEC" || tokens[index].CP == "Number" || tokens[index].CP == "Word" || tokens[index].VP == "this" || tokens[index].VP == "true" || tokens[index].VP == "false" || tokens[index].CP == "ARITHMATIC_OPERATORS" || tokens[index].CP == "LOGICAL_OPERATORS" || tokens[index].CP == "ASSIGN_OPERATORS" || tokens[index].CP == "IDENTIFIER" || tokens[index].VP == "this" || tokens[index].VP == "." || tokens[index].VP == "(" || tokens[index].VP == ")" || tokens[index].VP == "[" || tokens[index].VP == "]")
         {
             index++;
@@ -55,7 +57,7 @@ public:
 
     bool assign_op()
     {
-        if (tokens[index].VP == "=")
+        if (tokens[index].CP == "ASSIGN_OPERATORS")
         {
             index++;
             if (OE())
@@ -167,6 +169,7 @@ public:
             }
             if (tokens[index].VP == "{")
             {
+                SA.createScopeTable();
                 index++;
                 if (array_init())
                 {
@@ -175,6 +178,7 @@ public:
             }
             else if (tokens[index].VP == ";")
             {
+                index++;
                 return true;
             }
         }
@@ -192,6 +196,8 @@ public:
                 {
                     if (tokens[index].VP == ";")
                     {
+                        // SA.insertDataIntoScopeTable(name, type);
+                        index++;
                         return true;
                     }
                     else if (tokens[index].VP == "=")
@@ -199,6 +205,7 @@ public:
                         index++;
                         if (init1())
                         {
+                            // SA.insertDataIntoScopeTable(name, type);
                             return true;
                         }
                     }
@@ -206,15 +213,25 @@ public:
                     {
                         if (array_decl())
                         {
+                            // SA.insertDataIntoScopeTable(name,type+ " Array");
                             return true;
                         }
                     }
-                    else if( tokens[index].VP == "<"){
+                    else if (tokens[index].VP == "<")
+                    {
                         index++;
-                        if(tokens[index].VP =="Stack"){
+                        if (tokens[index].VP == "Stack")
+                        {
                             index++;
-                            if(tokens[index].VP == ">"){
+                            if (tokens[index].VP == ">")
+                            {
                                 index++;
+                                if (tokens[index].VP == ";")
+                                {
+                                    // SA.insertDataIntoScopeTable(name, type);
+                                    index++;
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -261,6 +278,7 @@ public:
     {
         if (tokens[index].CP == "IDENTIFIER")
         {
+            name = tokens[index].VP;
             index++;
             if (tokens[index].CP == "ASSIGN_OPERATORS")
             {
@@ -282,7 +300,7 @@ public:
 
     bool i_c()
     {
-        if (tokens[index].CP == "IDENTIFIER" || tokens[index].CP == "Word" || tokens[index].CP == "Number" || tokens[index].VP == "true" || tokens[index].VP == "false" || tokens[index].CP == "RELATIONAL_OPERATORS" || tokens[index].VP == ")" || tokens[index].CP == "LOGICAL_OPERATORS" || tokens[index].CP == "ASSIGN_OPERATORS" || tokens[index].CP == "ARITHMATIC_OPERATORS")
+        if (tokens[index].CP == "IDENTIFIER" || tokens[index].CP == "Word" || tokens[index].CP == "Number" || tokens[index].VP == "true" || tokens[index].VP == "false")
         {
             index++;
             return true;
@@ -292,12 +310,18 @@ public:
 
     bool cond()
     {
-        if (i_c())
+        if (tokens[index].CP == "IDENTIFIER" || tokens[index].CP == "Word" || tokens[index].CP == "Number" || tokens[index].VP == "true" || tokens[index].VP == "false")
         {
+            index++;
             while (tokens[index].VP != ")")
             {
                 if (i_c())
                 {
+                    continue;
+                }
+                if (tokens[index].CP == "RELATIONAL_OPERATORS" || tokens[index].CP == "LOGICAL_OPERATORS" || tokens[index].CP == "ARITHMATIC_OPERATORS")
+                {
+                    index++;
                     continue;
                 }
                 else
@@ -326,6 +350,7 @@ public:
                 {
                     if (tokens[index].VP == "{")
                     {
+                        SA.createScopeTable();
                         index++;
                         while (tokens[index].VP != "}")
                         {
@@ -364,6 +389,7 @@ public:
     {
         if (tokens[index].CP == "IDENTIFIER")
         {
+            name = tokens[index].VP;
             index++;
             if (tokens[index].VP == "(")
             {
@@ -380,7 +406,9 @@ public:
                 if (tokens[index].VP == ")")
                 {
                     index++;
-                    // if(tokens[index].VP == ";"){
+                    // SA.insertDataIntoScopeTable(name, type);
+                    // if (tokens[index].VP == ";")
+                    // {
                     //     index++;
                     //     return true;
                     // }
@@ -392,9 +420,45 @@ public:
         return false;
     }
 
+    bool assign_st()
+    {
+        if (tokens[index].VP == "this")
+        {
+            index++;
+            if (tokens[index].CP == "IDENTIFIER")
+            {
+                if (OE())
+                {
+                    return true;
+                }
+                else if (tokens[index].CP == "ASSIGN_OPERATORS")
+                {
+                    if (OE())
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     bool body()
     {
-        if (looping_till() || if_st() || decl() || init() || obj_decl())
+        if (tokens[index].CP == "IDENTIFIER" && tokens[index + 1].CP == "IDENTIFIER")
+        {
+            type = tokens[index].VP;
+            index++;
+            obj_decl();
+            SA.insertDataIntoScopeTable(name, type);
+            return true;
+        }
+        if (decl())
+        {
+            SA.insertDataIntoScopeTable(name, type);
+            return true;
+        }
+        if (looping_till() || if_st() || init() || assign_st())
         {
             return true;
         }
@@ -413,6 +477,7 @@ public:
             index++;
             if (tokens[index].VP == "{")
             {
+                SA.createScopeTable();
                 index++;
                 while (tokens[index].VP != "}")
                 {
@@ -447,6 +512,7 @@ public:
                 {
                     if (tokens[index].VP == "{")
                     {
+                        SA.createScopeTable();
                         index++;
                         while (tokens[index].VP != "}")
                         {
@@ -462,7 +528,7 @@ public:
                         if (tokens[index].VP == "}")
                         {
                             index++;
-                            if (if_not_st() || do_this() || body())
+                            if (if_not_st() || do_this())
                             {
                                 return true;
                             }
@@ -486,6 +552,7 @@ public:
                 {
                     if (tokens[index].VP == "{")
                     {
+                        SA.createScopeTable();
                         index++;
                         while (tokens[index].VP != "}")
                         {
@@ -503,7 +570,7 @@ public:
                         if (tokens[index].VP == "}")
                         {
                             index++;
-                            if (if_not_st() || if_st() || do_this() || body())
+                            if (if_not_st() || if_st() || do_this())
                             {
                                 return true;
                             }
@@ -519,6 +586,7 @@ public:
     {
         if (tokens[index].VP == "abstract" || tokens[index].VP == "sealed")
         {
+            typeModifer = tokens[index].VP;
             index++;
             return true;
         }
@@ -532,6 +600,14 @@ public:
             index++;
             if (tokens[index].CP == "IDENTIFIER")
             {
+                if (SA.lookupInMainTable(tokens[index].VP))
+                {
+                    parent = tokens[index].VP;
+                }
+                else {
+                    
+                    cerr << "No Parent Class with name \"" << tokens[index].VP <<  "\" found"  << endl;
+                }
                 index++;
                 if (tokens[index].VP == ")")
                 {
@@ -547,6 +623,7 @@ public:
     {
         if (tokens[index].CP == "IDENTIFIER")
         {
+            name = tokens[index].VP;
             index++;
             if (tokens[index].VP == "(")
             {
@@ -560,6 +637,7 @@ public:
                     }
                     else if (tokens[index].VP == "{")
                     {
+                        SA.createScopeTable();
                         index++;
                         while (tokens[index].VP != "}")
                         {
@@ -584,6 +662,7 @@ public:
                     index++;
                     if (tokens[index].VP == "{")
                     {
+                        SA.createScopeTable();
                         index++;
                         while (tokens[index].VP != "}")
                         {
@@ -616,15 +695,18 @@ public:
             index++;
             if (tokens[index].CP == "IDENTIFIER")
             {
+                name = "~"+tokens[index].VP;
                 index++;
                 if (tokens[index].VP == "(")
                 {
                     index++;
                     if (tokens[index].VP == ")")
                     {
+                        SA.insertDataIntoMemberTable(className,name,"destructor",accessModifer," ");
                         index++;
                         if (tokens[index].VP == "{")
                         {
+                            SA.createScopeTable();
                             index++;
                             while (tokens[index].VP != "}")
                             {
@@ -654,19 +736,20 @@ public:
     {
         if (tokens[index].CP == "IDENTIFIER" && tokens[index + 1].VP == "(")
         {
+            constructorName = tokens[index].VP;
             if (constructor())
             {
+                SA.insertDataIntoMemberTable(className, constructorName, paramsList, accessModifer, "");
                 return true;
             }
         }
         else if (decl())
         {
-            index++;
+            SA.insertDataIntoMemberTable(className, name, type, accessModifer, " ");
             return true;
         }
         else if (func_st())
         {
-            index++;
             return true;
         }
         else if (init() || destructor())
@@ -685,6 +768,7 @@ public:
     {
         if (tokens[index].CP == "ACCESS_MODIFIERS")
         {
+            accessModifer = tokens[index].VP;
             index++;
             if (statement())
             {
@@ -700,17 +784,22 @@ public:
         {
             if (tokens[index].CP == "ACCESS_MODIFIERS")
             {
+                accessModifer = tokens[index].VP;
                 index++;
                 if (tokens[index].VP == "class")
                 {
+                    type = tokens[index].VP;
                     index++;
                     if (tokens[index].CP == "IDENTIFIER")
                     {
+                        className = tokens[index].VP;
                         index++;
                         if (inheritence())
                         {
                             if (tokens[index].VP == "{")
                             {
+                                SA.createScopeTable();
+                                SA.insertDataIntoMainTable(className, type, accessModifer, typeModifer, parent);
                                 index++;
                                 while (tokens[index].VP != "}")
                                 {
@@ -730,6 +819,8 @@ public:
                         }
                         else if (tokens[index].VP == "{")
                         {
+                            SA.createScopeTable();
+                            SA.insertDataIntoMainTable(className, type, accessModifer, typeModifer, " ");
                             index++;
                             while (tokens[index].VP != "}")
                             {
@@ -752,17 +843,22 @@ public:
         }
         else if (tokens[index].CP == "ACCESS_MODIFIERS")
         {
+            accessModifer = tokens[index].VP;
             index++;
             if (tokens[index].VP == "class")
             {
+                type = tokens[index].VP;
                 index++;
                 if (tokens[index].CP == "IDENTIFIER")
                 {
+                    className = tokens[index].VP;
                     index++;
                     if (inheritence())
                     {
+                        SA.insertDataIntoMainTable(className, type, accessModifer, " ", parent);
                         if (tokens[index].VP == "{")
                         {
+                            SA.createScopeTable();
                             index++;
                             while (tokens[index].VP != "}")
                             {
@@ -782,6 +878,8 @@ public:
                     }
                     else if (tokens[index].VP == "{")
                     {
+                        SA.createScopeTable();
+                        SA.insertDataIntoMainTable(className, type, accessModifer, " ", " ");
                         index++;
                         while (tokens[index].VP != "}")
                         {
@@ -819,9 +917,9 @@ public:
                         if (tokens[index].VP == ":")
                         {
                             index++;
-                            if (tokens[index].CP == "DT")
+                            if (DT())
                             {
-                                index++;
+                                paramsList += " " + name + " " + type;
                                 continue;
                             }
                         }
@@ -846,9 +944,9 @@ public:
                 if (tokens[index].VP == ":")
                 {
                     index++;
-                    if (tokens[index].CP == "DT")
+                    if (DT())
                     {
-                        index++;
+                        paramsList +=" " +  name + " " + type;
                         if (newline())
                         {
                             return true;
@@ -869,9 +967,11 @@ public:
     {
         if (tokens[index].CP == "DT" || tokens[index].VP == "void")
         {
+            returnType = tokens[index].VP;
             index++;
             if (tokens[index].CP == "IDENTIFIER")
             {
+                funcName = tokens[index].VP;
                 index++;
                 if (tokens[index].VP == "=>")
                 {
@@ -881,8 +981,11 @@ public:
                         index++;
                         if (sp_decl())
                         {
+                            paramsList+= " -> " + returnType;
+                            SA.insertDataIntoMemberTable(className,funcName,paramsList,accessModifer,"");
                             if (tokens[index].VP == "{")
                             {
+                                SA.createScopeTable();
                                 index++;
                                 while (tokens[index].VP != "}")
                                 {
@@ -897,6 +1000,7 @@ public:
                                 }
                                 if (tokens[index].VP == "}")
                                 {
+                                    index++;
                                     return true;
                                 }
                             }
@@ -910,49 +1014,28 @@ public:
 
     bool other()
     {
-        if (tokens[index].VP == "}")
+        while (tokens[index].VP != "#")
         {
-            index++;
             if (class_def())
             {
-                other();
+                continue;
             }
-            else if (tokens[index].VP == "}")
-            {
-                index++;
-                if (class_def())
-                {
-                    index--;
-                    other();
-                }
-                else if (func_st())
-                {
-                    other();
-                }
-                if (tokens[index].VP == "#")
-                {
-                    return true;
-                }
-            }
-            else if (func_st())
-            {
-                if (other())
-                {
-                    return true;
-                }
-            }
+            else
+                break;
         }
+        if (tokens[index].VP == "#")
+        {
+            return true;
+        }
+
         return false;
     }
 
     bool main_fn()
     {
-        // if (tokens[index].VP == "void")
-        // {
-        //     flag = 1;
-        //     index++;
         if (tokens[index].VP == "main" || tokens[index].VP == "Main")
         {
+            name = tokens[index].VP;
             index++;
             if (tokens[index].VP == "=>")
             {
@@ -962,9 +1045,11 @@ public:
                     index++;
                     if (tokens[index].VP == ")")
                     {
+                        SA.insertDataIntoMemberTable(className, name, "", "", "");
                         index++;
                         if (tokens[index].VP == "{")
                         {
+                            SA.createScopeTable();
                             index++;
                             while (tokens[index].VP != "}")
                             {
@@ -979,10 +1064,7 @@ public:
                             }
                             if (tokens[index].VP == "}")
                             {
-                                // if (other())
-                                // {
-                                //     return true;
-                                // }
+                                index++;
                                 return true;
                             }
                         }
@@ -990,13 +1072,12 @@ public:
                 }
             }
         }
-        // }
         return false;
     }
 
     bool start()
     {
-        while (tokens[index + 2].VP != "Program")
+        while (tokens[index + 2].VP != "Main")
         {
             if (class_def())
             {
@@ -1005,22 +1086,27 @@ public:
         }
         if (tokens[index].VP == "public")
         {
+            accessModifer = tokens[index].VP;
             index++;
             if (tokens[index].VP == "class")
             {
+                type = tokens[index].VP;
                 index++;
-                if (tokens[index].VP == "Program")
+                if (tokens[index].VP == "Main")
                 {
+                    className = tokens[index].VP;
+                    SA.insertDataIntoMainTable(className, type, accessModifer, "", "");
                     index++;
                     if (tokens[index].VP == "{")
                     {
+                        SA.createScopeTable();
                         index++;
 
                         while (!main_fn())
                         {
                             if (func_st())
                             {
-                                index++;
+                                SA.insertDataIntoMemberTable(className,name,paramsList,"","");
                                 continue;
                             }
                             else
@@ -1028,8 +1114,10 @@ public:
                         }
                         if (tokens[index].VP == "}")
                         {
+                            index++;
                             if (other())
                             {
+                                SA.printResults();
                                 return true;
                             }
                         }

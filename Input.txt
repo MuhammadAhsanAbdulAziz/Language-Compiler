@@ -1,49 +1,11 @@
-public class Test ( abc ) {
+public class abc {
 
-    public Test ( var abc : Number , var abc : Word ) {
-        this . abc = abc ( ) [ 2 ] ;
-    } 
-
-    public ~ Test ( ) ;
-
-    public var abc : Number ;
-
-    
-
-    public void sampleFunction => ( var a : Number ) {
+    public void sampleFunction => ( var aa : Number ) {
         var a : Number [ 2 ] [ 2 ] { 2 , 3 } { "amir" , "chota" } ;
     }
 }
-
-abstract private class Test ( abc ) {
-
-    public Test ( var abc : Number , var abc : Word ) ;
-
-    public ~ Test ( ) ;
-
-    public var abc : Number ;
-
-    
-
-    public void sampleFunction => ( var a : Number ) {
-        var a : Number [ 2 ] [ 2 ] { 2 , 3 } { "amir" , "chota" } ;
-    }
-}
-
-public class Program
+public class Main
 {
-    void sampleFunction => ( var a : Number ) {
-
-    }
-
-    void sampleFunction => ( var a : Number , var a : Word ) {
-        
-    }
-
-    Number sampleFunction => ( ) {
-        
-    }
-
     main => ( )
     {
         var a : Number  < Stack >  ;
@@ -65,21 +27,13 @@ public class Program
         }
 
         looping_till ( i < 10 ) {
-            var a : Number = a + b * 2. ;
+            var a : Number = a + b * 2.2 ;
             a = 2 + 3 * b [ 3 ] % 2 ;  
         }
     } 
-
-    Number sampleFunction => ( ) {
-        
-    }
-
-    void sampleFunction => ( var a : Number , var a : Word ) {
-        
-    }
 }
 
-sealed public class Test ( abc ) {
+sealed public class Test3 ( abc ) {
 
     public Test ( var abc : Number , var abc : Word ) ;
 
@@ -89,11 +43,7 @@ sealed public class Test ( abc ) {
 
     
 
-    public void sampleFunction => ( var a : Number ) {
+    public void sampleFunction => ( var ab : Number ) {
         var a : Number [ 2 ] [ 2 ] { 2 , 3 } { "amir" , "chota" } ;
     }
 }
-
-    Number sampleFunction => ( ) {
-        
-    }

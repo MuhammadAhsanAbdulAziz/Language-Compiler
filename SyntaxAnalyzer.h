@@ -11,7 +11,7 @@ public:
         TerminalFunction func;
         if (func.start())
         {
-            cout << "Successfully Parsed";
+            cout << "Successfully Parsed" << endl;
         }
         else
         {
